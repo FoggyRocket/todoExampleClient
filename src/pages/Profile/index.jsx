@@ -3,25 +3,45 @@ import { Link } from "react-router-dom";
 import { Page } from "../../components";
 import {signupEp,loginEp} from '../../services/auth.services'
 import { useNavigate } from "react-router-dom";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../../context/auth.context";
-function Auth(props) {
+import { uploadSingle } from "../../services/upload.services";
+import { editProfile } from "../../services/user.services";
+function ProfilePage(props) {
 
     // pongo en uso el useNavigate
     const navigate = useNavigate()
     //pongo en uso el contexto
     const {storeToken, authenticateUser} = useContext(AuthContext)
+    const [urlImage,setUrlImage]=useState("")
+    const handleImage = async(e)=>{
+        try {
+            if(!e.target.files || e.target.files.length === 0){
+                return
+            }
+
+            //formData
+            const formData = new FormData();
+            formData.append("image",e.target.files[0] )
+            //[["key","value"],["key2","value"],....]
+            const response = await uploadSingle(formData)
+            console.log("Se subio la imagen",response)
+            setUrlImage(response.data.imgUrl)
+        } catch (error) {
+            console.log("error:",error)
+        }
+    }
   const onFinish = async(values) => {
    
     try {
         console.log("Success:", values);
-        const service = props.signup ? signupEp : loginEp;
-
-        const response = await service(values)
+        if(urlImage.length){
+            values["image_url"] = urlImage
+        }
+        const response = await editProfile(values)
         
-        storeToken(response.data.authToken)
-        authenticateUser();
-        navigate("/");
+        console.log("se actualizo????",response)
+       
         
     } catch (error) {
         console.log("error ",error)
@@ -56,48 +76,14 @@ function Auth(props) {
         autoComplete="off"
       >
         <Form.Item
-          label="Email"
-          name="email"
-          rules={[
-            {
-              type:"email",
-              required: true,
-              message: "Please input your email!",
-            },
-          ]}
-          hasFeedback
-        >
-          <Input />
-        </Form.Item>
-        {props.signup && 
-        <Form.Item
           label="Username"
           name="username"
-          rules={[
-            {
-              required: true,
-              message: "Please input your username!",
-            },
-          ]}
           hasFeedback
         >
           <Input />
         </Form.Item>
-        }
-        <Form.Item
-          label="Password"
-          name="password"
-          rules={[
-            {
-              required: true,
-              message: "Please input your password!",
-            },
-          ]}
-          hasFeedback
-        >
-          <Input.Password />
-        </Form.Item>
-
+        
+        <input type={"file"} onChange={handleImage} />
         <Form.Item
           wrapperCol={{
             offset: 8,
@@ -105,16 +91,8 @@ function Auth(props) {
           }}
         >
           <Button type="primary" htmlType="submit">
-            {
-                //si esta en la pagina de signup muestro Registro si no muestro Sign in
-                props.signup ? "Register" : "Sign in"
-            }
+            editar
           </Button>
-
-          or <a
-                 //si esta en la pagina de signup mando a login si no al signup
-            href={props.signup ? "/login":"/signup"}
-          > {  props.signup ? "Log in" : "Register now"}</a>
         </Form.Item>
       </Form>
     </Page>
@@ -122,4 +100,4 @@ function Auth(props) {
 }
 
 
-export default Auth;
+export default ProfilePage;

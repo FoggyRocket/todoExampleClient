@@ -2,7 +2,7 @@ import './App.css';
 import 'antd/dist/reset.css';
 import {Route,Routes} from 'react-router-dom'
 import {Navbar} from './components'
-import { Create, Detail, Home,Auth } from './pages';
+import { Create, Detail, Home,Auth, LogoutPage, ProfilePage } from './pages';
 function App() {
   return (
     <div className="App">
@@ -14,6 +14,8 @@ function App() {
         <Route path="/detail/:idTodo" element={<Detail/>} /> 
         <Route path="/login" element={<Auth/>} />
         <Route path="/signup" element={<Auth signup={true}/>} />
+        <Route path="/logout" element={<LogoutPage/>} />
+        <Route path="/profile" element={<ProfilePage/>} />
 
         {/* 404 */}
         <Route path="*" element={<h1>404</h1>} />
